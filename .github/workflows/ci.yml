@@ -1,16 +1,14 @@
+
 name: Assignment Portal CI
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
 
     steps:
       - name: Checkout repository
@@ -29,14 +27,18 @@ jobs:
 
       - name: Run tests and send report
         env:
-          REPORT_URL: ${{ secrets.REPORT_URL }}
+          REPORT_URL: http://127.0.0.1:5001/report
           REPORT_TOKEN: ${{ secrets.REPORT_TOKEN }}
+        shell: pwsh
         run: |
-          set +e
           python -m pytest -v --json-report --json-report-file=pytest-report.json
-          TEST_EXIT_CODE=$?
-          set -e
+          $testExitCode = $LASTEXITCODE
 
           python scripts/send_report.py
+          $reportExitCode = $LASTEXITCODE
 
-          exit $TEST_EXIT_CODE
+          if ($reportExitCode -ne 0) {
+              exit $reportExitCode
+          }
+
+          exit $testExitCode
