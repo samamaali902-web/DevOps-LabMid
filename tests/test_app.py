@@ -74,5 +74,3 @@ def test_invalid_submission_url(tmp_path, monkeypatch):
 
     assert count == 0
 
-def test_deliberate_failure():
-    assert 1 == 2
